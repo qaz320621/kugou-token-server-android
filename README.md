@@ -40,9 +40,11 @@ adb forward tcp:8765 tcp:8765
 
 ## 使用
 
+- **打开 App 即自动启动 Token 服务**（前台 Service），退到后台/桌面仍常驻；点「停止服务」可停
 - 手机浏览器打开 `http://127.0.0.1:8765/` → 点「扫码登录」→ 手机酷狗 App 扫码确认
 - token 自动存入 SharedPreferences，手机版 MusicFree 插件从 `http://127.0.0.1:8765/token` 拉取
 - 包名：`com.chumc.tokenserver`，端口 8765
+- **不做开机自启**（按需常驻，非默认自启）
 
 ## 接口
 

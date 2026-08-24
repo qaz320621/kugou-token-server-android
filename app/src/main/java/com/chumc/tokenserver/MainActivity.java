@@ -1,8 +1,7 @@
 package com.chumc.tokenserver;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,8 +19,6 @@ import java.util.Enumeration;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TokenHttpServer server;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private TextView statusText;
     private TextView addressText;
     private Button startBtn;
@@ -46,45 +43,34 @@ public class MainActivity extends AppCompatActivity {
         startBtn.setOnClickListener(v -> startServer());
         stopBtn.setOnClickListener(v -> stopServer());
 
-        // 状态默认：已停止（手动点按钮启动）
-        updateStatus(false);
-
-        // adb 后门：adb shell am start ... --ez auto_start true 可免点击启动服务
-        if (getIntent().getBooleanExtra("auto_start", false)) {
-            startServer();
-        }
+        // App 打开即启动 Token 服务（后台常驻；不做开机自启）
+        startServer();
     }
 
     private void startServer() {
-        if (server != null) {
-            return;
-        }
-        try {
-            TokenHttpServer s = new TokenHttpServer(this);
-            s.start(NanoTimeoutHolder.TIMEOUT);
-            server = s;
-            updateStatus(true);
-            Toast.makeText(this, "服务已启动", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, "启动失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        startService(new Intent(this, TokenService.class));
+        Toast.makeText(this, "Token 服务启动中", Toast.LENGTH_SHORT).show();
+        refreshStatus();
     }
 
     private void stopServer() {
-        if (server != null) {
-            server.stop();
-            server = null;
-            updateStatus(false);
-            Toast.makeText(this, "服务已停止", Toast.LENGTH_SHORT).show();
-        }
+        stopService(new Intent(this, TokenService.class));
+        Toast.makeText(this, "Token 服务已停止", Toast.LENGTH_SHORT).show();
+        refreshStatus();
     }
 
-    private void updateStatus(boolean running) {
-        if (running) {
-            statusText.setText("● 运行中");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshStatus();
+    }
+
+    private void refreshStatus() {
+        if (TokenService.running) {
+            statusText.setText("● 运行中（后台常驻）");
             statusText.setTextColor(0xFF2E7D32);
             String ip = getLocalIpAddress();
-            addressText.setText("本机访问: http://127.0.0.1:" + TokenHttpServer.PORT + "/\n局域网访问: http://" + ip + ":" + TokenHttpServer.PORT + "/");
+            addressText.setText("本机: http://127.0.0.1:" + TokenHttpServer.PORT + "/\n局域网: http://" + ip + ":" + TokenHttpServer.PORT + "/");
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
         } else {
@@ -116,16 +102,5 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
         return "127.0.0.1";
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopServer();
-    }
-
-    /** NanoHTTPD start 超时参数（毫秒） */
-    private static class NanoTimeoutHolder {
-        static final int TIMEOUT = 5000;
     }
 }
