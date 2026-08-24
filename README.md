@@ -1,6 +1,13 @@
 # Android 版 Token 登录服务（NanoHTTPD + ZXing）
 
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/qaz320621/kugou-token-server-android" />
+  <img src="https://img.shields.io/github/downloads/qaz320621/kugou-token-server-android/total" />
+</p>
+
 酷狗扫码登录 + Token 管理（Android App），供手机版 MusicFree 插件拉取配置。
+
+📥 下载 APK：[app-debug.apk（最新版）](https://github.com/qaz320621/kugou-token-server-android/releases/latest/download/app-debug.apk)（可直接安装）
 
 ## 依赖关系
 
