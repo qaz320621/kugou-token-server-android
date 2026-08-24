@@ -2,6 +2,8 @@ package com.chumc.tokenserver;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import java.util.Enumeration;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private TextView statusText;
     private TextView addressText;
     private Button startBtn;
@@ -50,13 +53,14 @@ public class MainActivity extends AppCompatActivity {
     private void startServer() {
         startService(new Intent(this, TokenService.class));
         Toast.makeText(this, "Token 服务启动中", Toast.LENGTH_SHORT).show();
-        refreshStatus();
+        // Service 的 running 标志是异步设置的，延迟刷新保证按钮状态实时更新
+        handler.postDelayed(this::refreshStatus, 800);
     }
 
     private void stopServer() {
         stopService(new Intent(this, TokenService.class));
         Toast.makeText(this, "Token 服务已停止", Toast.LENGTH_SHORT).show();
-        refreshStatus();
+        handler.postDelayed(this::refreshStatus, 800);
     }
 
     @Override
